@@ -1,6 +1,6 @@
 # Notes Service - Supabase Backend
 
-A minimal notes service backend built with Supabase.
+A notes app using supabase which mentiond in assingnment
 
 ## Schema Design
 
@@ -8,9 +8,9 @@ A minimal notes service backend built with Supabase.
 
 ```sql
 CREATE TABLE notes (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
-    title TEXT NOT NULL,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,  --> unique primary key
+    user_id UUID REFERENCES auth.users(id) NOT NULL, ---> auth
+    title TEXT NOT NULL, 
     content TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -81,4 +81,77 @@ CREATE TABLE notes (
 3. **Input Validation**
    - Required fields are validated
    - Optional fields have sensible defaults
-   - Prevents malformed data from entering the system 
+   - Prevents malformed data from entering the system
+
+## How to Log In and Get Your Access Token
+
+After signing up, you can log in using the `/login` endpoint. Here is an example using Postman:
+
+**POST** `https://notes-supabase.onrender.com/login`
+
+Body (JSON):
+```json
+{
+  "email": "your@email.com",
+  "password": "yourpassword"
+}
+```
+
+If successful, you will get a response like this (see screenshot below):
+
+![Login in Postman](login_postman.png)
+
+- Copy the `access_token` from the response.
+- Use this token in the `Authorization` header for all protected endpoints (like `/notes`).
+
+## Example API Usage with curl
+
+### 1. Create a Note
+
+```bash
+curl -X POST https://notes-supabase.onrender.com/notes \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d    `{
+    "title" : "hhh",
+    "content": "This is .",
+    "tags": ["personal", "important"]
+  }'
+```
+
+**Sample Output:**
+```json
+{
+  "id": "b3b1c2e0-8c2a-4e2a-9b1a-2c3e4d5f6a7b",
+  "user_id": "1a697ddc-69c4-4c4a-8f7e-9dba44aae9b2",
+  "title": "Beat",
+  "content": "This is the story.",
+  "created_at": "2025-05-04T10:00:00.000Z",
+  "updated_at": "2025-05-04T10:00:00.000Z",
+  "is_archived": false,
+  "tags": ["per", "important"]
+}
+```
+
+### 2. Get All Notes
+
+```bash
+curl https://notes-supabase.onrender.com/notes \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Sample Output:**
+```json
+[
+  {
+    "id": "b3b1c2e0-8c2a-4e2a-9b1a-2c3e4d5f6a7b",
+    "user_id": "1a697ddc-69c4-4c4a-8f7e-9dba44aae9b2",
+    "title": "  Beat one ",
+    "content": "This is the story",
+    "created_at": "2025-05-04T10:00:00.000Z",
+    "updated_at": "2025-05-04T10:00:00.000Z",
+    "is_archived": false,
+    "tags": ["pel", "important"]
+  }
+]
+``` 

@@ -16,59 +16,59 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Function to create table if it doesn't exist
-async function createTableIfNotExists() {
-  try {
-    // Check if table exists by trying to select from it
-    const { data, error } = await supabase
-      .from('notes')
-      .select('id')
-      .limit(1);
+// async function createTableIfNotExists() {
+//   try {
+//     // Check if table exists by trying to select from it
+//     const { data, error } = await supabase
+//       .from('notes')
+//       .select('id')
+//       .limit(1);
 
-    if (error && error.code === '42P01') { // Table doesn't exist
-      console.log('Table does not exist. Please create it in Supabase SQL Editor.');
-      console.log('Run this SQL in your Supabase SQL Editor:');
-      console.log(`
-        CREATE TABLE notes (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          user_id UUID REFERENCES auth.users(id) NOT NULL,
-          title TEXT NOT NULL,
-          content TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-          is_archived BOOLEAN DEFAULT false,
-          tags TEXT[]
-        );
+//     if (error && error.code === '42P01') { // Table doesn't exist
+//       console.log('Table does not exist. Please create it in Supabase SQL Editor.');
+//       console.log('Run this SQL in your Supabase SQL Editor:');
+//       console.log(`
+//         CREATE TABLE notes (
+//           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+//           user_id UUID REFERENCES auth.users(id) NOT NULL,
+//           title TEXT NOT NULL,
+//           content TEXT,
+//           created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+//           updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+//           is_archived BOOLEAN DEFAULT false,
+//           tags TEXT[]
+//         );
 
-        CREATE INDEX notes_user_id_idx ON notes(user_id);
+//         CREATE INDEX notes_user_id_idx ON notes(user_id);
 
-        CREATE OR REPLACE FUNCTION update_updated_at_column()
-        RETURNS TRIGGER AS $$
-        BEGIN
-          NEW.updated_at = timezone('utc'::text, now());
-          RETURN NEW;
-        END;
-        $$ language 'plpgsql';
+//         CREATE OR REPLACE FUNCTION update_updated_at_column()
+//         RETURNS TRIGGER AS $$
+//         BEGIN
+//           NEW.updated_at = timezone('utc'::text, now());
+//           RETURN NEW;
+//         END;
+//         $$ language 'plpgsql';
 
-        CREATE TRIGGER update_notes_updated_at
-          BEFORE UPDATE ON notes
-          FOR EACH ROW
-          EXECUTE FUNCTION update_updated_at_column();
-      `);
-      return false;
-    }
+//         CREATE TRIGGER update_notes_updated_at
+//           BEFORE UPDATE ON notes
+//           FOR EACH ROW
+//           EXECUTE FUNCTION update_updated_at_column();
+//       `);
+//       return false;
+//     }
     
-    return true;
-  } catch (error) {
-    console.error('Error checking table:', error);
-    return false;
-  }
-}
+//     return true;
+//   } catch (error) {
+//     console.error('Error checking table:', error);
+//     return false;
+//   }
+// }
 
-// Initialize table on server start
-createTableIfNotExists();
+// // Initialize table on server start
+// createTableIfNotExists();
 
 // Health check endpoint
-app.get('/health', async (req, res) => {
+app.get('/check', async (req, res) => {
   try {
     // Check if Supabase client is properly initialized
     if (!supabaseUrl || !supabaseKey) {
